@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload SNP Files</title>
+</head>
+<body>
+    <h1>Upload Your SNP Files</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="sample_file">Sample File:</label>
+        <input type="file" name="sample_file" required><br><br>
+        
+        <label for="reference_file">Reference File:</label>
+        <input type="file" name="reference_file" required><br><br>
+
+        <input type="submit" value="Upload Files">
+    </form>
+</body>
+</html>
