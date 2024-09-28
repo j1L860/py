@@ -1,11 +1,11 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_from_directory
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
 app = Flask(__name__)
 
-# Path to save uploaded files
+# Path to save uploaded files and plots
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -59,16 +59,25 @@ def upload_file():
 
     # Plot the results
     haplogroup_status = results_df.groupby(['HAPLOGROUP', 'STATUS']).size().unstack(fill_value=0)
+
+    # Save the plot to a file in the uploads directory
     plot_filepath = os.path.join(UPLOAD_FOLDER, 'haplogroup_plot.png')
     haplogroup_status.plot(kind='bar', stacked=True, color=['red', 'green', 'gray'], figsize=(6, 4))
     plt.xlabel('Haplogroup')
     plt.ylabel('Number of SNPs')
     plt.title('Haplogroup Confirmation Results')
     plt.legend(['N-', 'P+', 'U*'])
+    
+    # Save and close the plot to avoid memory issues
     plt.savefig(plot_filepath)
     plt.close()
 
-    return render_template('results.html', plot_url=plot_filepath)
+    # Redirect to the results page and show the plot
+    return render_template('results.html', plot_url=f'/uploads/haplogroup_plot.png')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
