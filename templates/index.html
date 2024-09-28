@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNP Comparison Tool</title>
+</head>
+<body>
+    <h1>SNP Comparison Tool</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <label for="file1">Upload File 1 (sample data):</label><br>
+        <input type="file" id="file1" name="file1" required><br><br>
+        <label for="file2">Upload File 2 (reference data):</label><br>
+        <input type="file" id="file2" name="file2" required><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if positive_snps_count %}
+        <h2>Results</h2>
+        <p>Number of positive SNPs: {{ positive_snps_count }}</p>
+        <h3>Plot:</h3>
+        <img src="{{ plot_url }}" alt="Result Plot">
+    {% endif %}
+</body>
+</html>
