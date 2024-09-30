@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, send_from_directory
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-import requests
 
 app = Flask(__name__)
 
@@ -10,78 +9,71 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# URL to the reference file
-REFERENCE_FILE_URL = '/uploads/ref.txt'
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    plot_url = None
+    return render_template('index.html')
 
-    if request.method == 'POST':
-        # Check if the sample file is uploaded
-        if 'sample_file' not in request.files:
-            return "Error: Missing sample file", 400
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    # Check if files are uploaded
+    if 'sample_file' not in request.files or 'reference_file' not in request.files:
+        return "Error: Missing files", 400
 
-        sample_file = request.files['sample_file']
+    sample_file = request.files['sample_file']
+    reference_file = 'uploads/ref.txt'
 
-        # Save the sample file to the upload folder
-        sample_filepath = os.path.join(UPLOAD_FOLDER, sample_file.filename)
-        sample_file.save(sample_filepath)
+    # Save the files to the upload folder
+    sample_filepath = os.path.join(UPLOAD_FOLDER, sample_file.filename)
+    reference_filepath = os.path.join(UPLOAD_FOLDER, reference_file.filename)
+    sample_file.save(sample_filepath)
+    reference_file.save(reference_filepath)
 
-        # Load the reference file from the URL
-        reference_response = requests.get(REFERENCE_FILE_URL)
-        if reference_response.status_code != 200:
-            return "Error: Could not download reference file", 500
+    # Process the uploaded files
+    sample_data = pd.read_csv(sample_filepath)
+    reference_data = pd.read_csv(reference_filepath)
 
-        reference_data = pd.read_csv(pd.compat.StringIO(reference_response.text))
+    # Compare SNPs (as per your original logic)
+    results = []
+    for _, row in sample_data.iterrows():
+        position = row['POSITION']
+        result = row['RESULT']
 
-        # Process the uploaded sample file
-        sample_data = pd.read_csv(sample_filepath)
+        if len(result) > 1:
+            second_nucleotide = result[1]
+        else:
+            second_nucleotide = result
 
-        # Compare SNPs
-        results = []
-        for _, row in sample_data.iterrows():
-            position = row['POSITION']
-            result = row['RESULT']
-
-            if len(result) > 1:
-                second_nucleotide = result[1]
+        ref_row = reference_data[reference_data['POSITION'] == position]
+        if not ref_row.empty:
+            ref_allele = ref_row['RESULT'].values[0][1]
+            if second_nucleotide == '-':
+                match_status = 'U*'
+            elif second_nucleotide == ref_allele:
+                match_status = 'P+'
             else:
-                second_nucleotide = result
+                match_status = 'N-'
+            haplogroup = ref_row['HAPLOGROUP'].values[0]
+            results.append((position, match_status, haplogroup))
 
-            ref_row = reference_data[reference_data['POSITION'] == position]
-            if not ref_row.empty:
-                ref_allele = ref_row['RESULT'].values[0][1]
-                if second_nucleotide == '-':
-                    match_status = 'U*'
-                elif second_nucleotide == ref_allele:
-                    match_status = 'P+'
-                else:
-                    match_status = 'N-'
-                haplogroup = ref_row['HAPLOGROUP'].values[0]
-                results.append((position, match_status, haplogroup))
+    results_df = pd.DataFrame(results, columns=['POSITION', 'STATUS', 'HAPLOGROUP'])
 
-        results_df = pd.DataFrame(results, columns=['POSITION', 'STATUS', 'HAPLOGROUP'])
+    # Plot the results
+    haplogroup_status = results_df.groupby(['HAPLOGROUP', 'STATUS']).size().unstack(fill_value=0)
 
-        # Plot the results
-        haplogroup_status = results_df.groupby(['HAPLOGROUP', 'STATUS']).size().unstack(fill_value=0)
+    # Save the plot to a file in the uploads directory
+    plot_filepath = os.path.join(UPLOAD_FOLDER, 'haplogroup_plot.png')
+    haplogroup_status.plot(kind='bar', stacked=True, color=['red', 'green', 'gray'], figsize=(6, 4))
+    plt.xlabel('Haplogroup')
+    plt.ylabel('Number of SNPs')
+    plt.title('Haplogroup Confirmation Results')
+    plt.legend(['N-', 'P+', 'U*'])
+    
+    # Save and close the plot to avoid memory issues
+    plt.savefig(plot_filepath)
+    plt.close()
 
-        # Save the plot to a file in the uploads directory
-        plot_filepath = os.path.join(UPLOAD_FOLDER, 'haplogroup_plot.png')
-        haplogroup_status.plot(kind='bar', stacked=True, color=['red', 'green', 'gray'], figsize=(6, 4))
-        plt.xlabel('Haplogroup')
-        plt.ylabel('Number of SNPs')
-        plt.title('Haplogroup Confirmation Results')
-        plt.legend(['N-', 'P+', 'U*'])
-
-        # Save and close the plot to avoid memory issues
-        plt.savefig(plot_filepath)
-        plt.close()
-
-        # Set plot_url to pass to the template
-        plot_url = f'/uploads/haplogroup_plot.png'
-
-    return render_template('index.html', plot_url=plot_url)
+    # Redirect to the results page and show the plot
+    return render_template('results.html', plot_url=f'/uploads/haplogroup_plot.png')
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
