@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, send_from_directory
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-import requests
 
 app = Flask(__name__)
 
@@ -10,8 +9,8 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# URL of the reference file
-REFERENCE_FILE_URL = 'https://raw.githubusercontent.com/j1L860/py/refs/heads/main/uploads/File2_3.txt'
+# Path to the local reference file
+REFERENCE_FILE_PATH = '/py/uploads/ref.txt'
 
 @app.route('/')
 def index():
@@ -29,12 +28,8 @@ def upload_file():
     sample_filepath = os.path.join(UPLOAD_FOLDER, sample_file.filename)
     sample_file.save(sample_filepath)
 
-    # Download the reference file
-    response = requests.get(REFERENCE_FILE_URL)
-    if response.status_code != 200:
-        return "Error: Could not fetch reference file", 500
-
-    reference_data = pd.read_csv(pd.compat.StringIO(response.text))
+    # Load the reference file from the local path
+    reference_data = pd.read_csv(REFERENCE_FILE_PATH)
 
     # Process the uploaded sample file
     sample_data = pd.read_csv(sample_filepath)
