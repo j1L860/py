@@ -3,22 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNP Comparison Tool</title>
+    <title>المتنبئ الجيني</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .result-image {
+            margin-top: 20px;
+        }
+        .back-link {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>SNP Comparison Tool</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <label for="file1">Upload File 1 (sample data):</label><br>
-        <input type="file" id="file1" name="file1" required><br><br>
 
-
-        <input type="submit" value="Submit">
+    <h1>المتنبئ الجيني</h1>
+    <h4>قم برفع ملف العينة</h4>
+    
+    <!-- Form to upload the sample file -->
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <label for="sample_file">Sample File (CSV):</label>
+        <input type="file" name="sample_file" required>
+        <button type="submit">Upload and Analyze</button>
     </form>
-    {% if positive_snps_count %}
-    <h2>Results</h2>
-    <p>Number of positive SNPs: {{ positive_snps_count }}</p>
-    <h3>Plot:</h3>
-    <img src="{{ url_for('uploaded_file', filename='result_plot.png') }}" alt="Result Plot">
-{% endif %}
+
+    <!-- If the plot URL is available, display the plot -->
+    {% if plot_url %}
+    <div class="result-image">
+        <h1>Results</h1>
+        <img src="{{ plot_url }}" alt="Haplogroup Plot">
+        <br><br>
+        <a href="/" class="back-link">رجوع الى القائمة الرئيسية</a>
+    </div>
+    {% endif %}
+
 </body>
 </html>
