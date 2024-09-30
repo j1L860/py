@@ -11,7 +11,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # URL to the reference file
-REFERENCE_FILE_URL = 'https://raw.githubusercontent.com/j1L860/py/refs/heads/main/uploads/ref.txt'
+REFERENCE_FILE_URL = '/uploads/ref.txt'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
