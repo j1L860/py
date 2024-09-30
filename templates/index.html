@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haplogroup Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        .result-image {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload Sample File for Haplogroup Confirmation</h1>
+    
+    <!-- Form to upload the sample file -->
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <label for="sample_file">Sample File (CSV):</label>
+        <input type="file" name="sample_file" required>
+        <button type="submit">Upload and Analyze</button>
+    </form>
+
+    <!-- If the plot URL is available, display the plot -->
+    {% if plot_url %}
+    <div class="result-image">
+        <h2>Results</h2>
+        <img src="{{ plot_url }}" alt="Haplogroup Confirmation Results">
+    </div>
+    {% endif %}
+
+</body>
+</html>
