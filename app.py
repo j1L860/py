@@ -10,7 +10,7 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Path to the local reference file
-REFERENCE_FILE_PATH = '/py/uploads/ref.txt'
+REFERENCE_FILE_PATH = '/uploads/ref.txt'
 
 @app.route('/')
 def index():
