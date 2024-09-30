@@ -32,6 +32,18 @@
         <button type="submit">Upload and Analyze</button>
     </form>
 
+  <title>Results</title>
+</head>
+<body>
+    <h1>Results</h1>
+    <img src="{{ plot_url }}" alt="Haplogroup Plot">
+    <br><br>
+    <a href="/">رجوع الى القائمة الرئيسية</a>
+</body>
+</html>
+
+
+    
     <!-- If the plot URL is available, display the plot -->
     {% if plot_url %}
     <div class="result-image">
