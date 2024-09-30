@@ -9,28 +9,30 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Path to the fixed reference file
+REFERENCE_FILEPATH = os.path.join(UPLOAD_FOLDER, 'ref.txt')
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    # Check if files are uploaded
-    if 'sample_file' not in request.files or 'reference_file' not in request.files:
-        return "Error: Missing files", 400
+    # Check if the sample file is uploaded
+    if 'sample_file' not in request.files:
+        return "Error: Missing sample file", 400
 
     sample_file = request.files['sample_file']
-    reference_file = 'uploads/ref.txt'
 
-    # Save the files to the upload folder
+    # Save the sample file to the upload folder
     sample_filepath = os.path.join(UPLOAD_FOLDER, sample_file.filename)
-    reference_filepath = os.path.join(UPLOAD_FOLDER, reference_file.filename)
     sample_file.save(sample_filepath)
-    reference_file.save(reference_filepath)
 
-    # Process the uploaded files
+    # Process the uploaded sample file and fixed reference file
     sample_data = pd.read_csv(sample_filepath)
-    reference_data = pd.read_csv(reference_filepath)
+
+    # Load the fixed reference file
+    reference_data = pd.read_csv(REFERENCE_FILEPATH)
 
     # Compare SNPs (as per your original logic)
     results = []
@@ -67,7 +69,7 @@ def upload_file():
     plt.ylabel('Number of SNPs')
     plt.title('Haplogroup Confirmation Results')
     plt.legend(['N-', 'P+', 'U*'])
-    
+
     # Save and close the plot to avoid memory issues
     plt.savefig(plot_filepath)
     plt.close()
