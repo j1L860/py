@@ -44,8 +44,12 @@ def upload_file():
             second_nucleotide = result[1]
         else:
             second_nucleotide = result
-
-        ref_row = reference_data[reference_data['POSITION'] == position]
+   # Find the matching reference SNP within position ranges from -50 to +50
+    for delta in range(201):  # Loop over the range 0 to 50
+        # Look for matches within both directions
+        ref_row_minus = reference_data[reference_data['POSITION'] == position - delta]
+        ref_row_plus = reference_data[reference_data['POSITION'] == position + delta]
+     #   ref_row = reference_data[reference_data['POSITION'] == position]
         if not ref_row.empty:
             ref_allele = ref_row['RESULT'].values[0][1]
             if second_nucleotide == '-':
